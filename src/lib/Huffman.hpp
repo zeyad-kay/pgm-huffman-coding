@@ -56,10 +56,17 @@ private:
         std::vector<K> vect(buffer,buffer + size);
         auto node = root;
         
-        
-        for (int i = 0; i < size; i++)
+        std::string str;
+        for(auto i : vect)
         {
-            if (vect[i] == 0)
+            std::bitset<8> bits(i);
+            str += bits.to_string();
+        }
+
+        int strSize = str.size();
+        for (int i = 0; i < strSize; i++)
+        {
+            if (str[i] == '0')
             {
                 node = node->left;
             }
@@ -69,7 +76,6 @@ private:
             }
             if (isLeaf(node))
             {
-                // std::cout << node->key << " ";
                 decodedStream.push_back(node->key);
                 node = root;
             }  
@@ -101,7 +107,7 @@ private:
     }
     
 public:
-    Map<K,std::string> rMap(){return charCode;}
+    
     size_t size()
     {
         return size(root);
@@ -144,9 +150,7 @@ public:
         char byte = 0;
         int counter = 1;
         for (auto i : charStream)
-        {           
-            // feed me more food
-            
+        {   
             for(auto c : charCode[i])
             {
                 if (c == '0')
@@ -157,7 +161,7 @@ public:
 
                 else
                 {
-                    byte = (byte << 1) | 0x01;
+                    byte = (byte << 1) | 1;
                 }
 
                 if (counter % 8 == 0)
