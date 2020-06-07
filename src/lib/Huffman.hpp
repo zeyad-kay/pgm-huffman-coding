@@ -48,9 +48,11 @@ private:
 
     void decode(std::vector<K> &decodedStream, std::ifstream &file)
     {
+        std::streampos current = file.tellg();
+        file.seekg(current , std::ios::end);
         std::streamsize size = file.tellg();
         char * buffer = new char[size];
-        file.seekg(0,std::ios::beg);
+        file.seekg(current);
 
         file.read(buffer,size);
         std::vector<K> vect(buffer,buffer + size);
@@ -80,7 +82,7 @@ private:
                 node = root;
             }  
         }
-
+        delete [] buffer;
     }
     
     void encode(Node<K,V> * node, std::string str, Map<K,std::string> &charCode)
@@ -155,7 +157,6 @@ public:
             {
                 if (c == '0')
                 {   
-
                     byte <<= 1; 
                 }
 

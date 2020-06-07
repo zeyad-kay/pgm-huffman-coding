@@ -9,7 +9,7 @@
 
 namespace pgm
 {
-    std::vector<uint8_t> readPGM(std::ifstream &readFile, int &width, int &height ,int &maxValue)
+    std::vector<uint8_t> readPGM(std::ifstream &readFile, int &width, int &height)
     {
         int size;
         std::string line;
@@ -25,8 +25,10 @@ namespace pgm
             getline(readFile,line);
             ss << line;
             ss >> width >> height;
+            
+            // skip Maximum value
             getline(readFile,line);
-            maxValue =std::stoi(line);
+            
             
             size = width *  height;
             std::vector<uint8_t> pixels(size);
@@ -44,8 +46,9 @@ namespace pgm
             getline(readFile,line);
             ss << line;
             ss >> width >> height;
+
+            // skip Maximum value
             getline(readFile,line);
-            maxValue =std::stoi(line);
             
             size = width *  height;
             std::vector<uint8_t> pixels(size);
@@ -63,7 +66,7 @@ namespace pgm
         }
     }
 
-    void writePGM(std::ofstream &writeFile, std::string format,std::vector<uint8_t> pixels, int width, int height, int maxValue)
+    void writePGM(std::ofstream &writeFile, std::string format,std::vector<uint8_t> pixels, int width, int height)
     {
         if (!writeFile.is_open())
         {
@@ -76,7 +79,7 @@ namespace pgm
         {
             writeFile << "P2" << '\n';
             writeFile << width << " " << height << '\n';
-            writeFile << maxValue << '\n';
+            writeFile << "255" << '\n';
             for (int i = 1; i <= size; i++)
             {
                 if (i % width == 0)
@@ -90,7 +93,7 @@ namespace pgm
         {            
             writeFile << "P5" << '\n';
             writeFile << width << " " << height << '\n';
-            writeFile << maxValue << '\n';
+            writeFile << "255" << '\n';
             for (int i = 0; i < size; i++)
             {
                 writeFile << (unsigned char) pixels[i];      
