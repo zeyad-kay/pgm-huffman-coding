@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include "lib/cxxopts-2.2.0/include/cxxopts.hpp"
+#include "lib/cxxopts.hpp"
 #include "lib/helpers.hpp"
 #include "lib/Queue.hpp"
 #include "lib/Map.hpp"
@@ -59,18 +59,23 @@ int main(int argc, char** argv)
             exit(1);
         }
 
+        std::cout << "Decompressing...\n";
+
         encFile.read((char *) &width, sizeof(width));
         encFile.read((char *) &height, sizeof(height));
         std::vector<uint8_t> pixels;
         pixels = huffTree.decodeFile(encFile);
         encFile.close();
         remove((char *) &fileName[0]);
+
+        std::cout << "Image Resolution: " << width << "x" << height << "\n";
         
         //  write pgm Image file
         std::ofstream pgmFile("image.pgm");
         pgm::writePGM(pgmFile,"P5",pixels,width,height);
         pgmFile.flush();
         pgmFile.close();
+        std::cout << "DONE!\n";
     }
 
     // -----------------------------------------------> COMPRESSION
@@ -87,7 +92,9 @@ int main(int argc, char** argv)
         std::vector<uint8_t> pixels = pgm::readPGM(pgmFile,width,height);
 
         size = width * height;
-        pgmFile.close();  
+        pgmFile.close();
+
+        std::cout << "Image Resolution: " << width << "x" << height << "\n" << "Compressing..." << "\n";
 
         Map<uint8_t,int> frequencyTable;
         pgm::freqTable(frequencyTable,pixels);
@@ -109,5 +116,6 @@ int main(int argc, char** argv)
         encFile.flush();
         encFile.close();
         remove((char *) argv[1]);
+        std::cout << "DONE!\n";
     }
 }
