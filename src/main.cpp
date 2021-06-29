@@ -26,38 +26,35 @@ int main(int argc, char** argv)
     }
 
     // -----------------------------------------------> DECOMPRESSION
-     if (result.count("tree"))
+    if (result.count("tree"))
     {
 
         // read frequency file
-        std::string fileName = result["tree"].as<std::string>();
-        std::ifstream frqFile(fileName);
+        std::string treeFileName = result["tree"].as<std::string>();
+        std::ifstream frqFile(treeFileName);
+        // read encoded file 
+        std::string encodedFileName = (std::string) argv[1];
+        std::ifstream encFile(encodedFileName,std::ios::binary);
         
         if (!frqFile)
         {
             std::cout << "Tree file doesn't exist\n";
             exit(1);
         }
-        
-        Map<uint8_t,int> frequencyTable;
-        frequencyTable.readFreq(frqFile);
-        frqFile.close();
-        remove((char *) &fileName[0]);
-        
-        int width, height, size = width * height;
-
-        HuffmanTree<uint8_t,int> huffTree;
-        huffTree.buildTree(frequencyTable);
-
-        // read encoded file 
-        fileName = argv[1];
-        std::ifstream encFile(fileName,std::ios::binary);
-        
         if (!encFile)
         {
             std::cout << "Encoded file doesn't exist\n";
             exit(1);
         }
+        
+        Map<uint8_t,int> frequencyTable;
+        frequencyTable.readFreq(frqFile);
+        frqFile.close();
+        
+        int width, height, size = width * height;
+
+        HuffmanTree<uint8_t,int> huffTree;
+        huffTree.buildTree(frequencyTable);      
 
         std::cout << "Decompressing...\n";
 
@@ -66,15 +63,17 @@ int main(int argc, char** argv)
         std::vector<uint8_t> pixels;
         pixels = huffTree.decodeFile(encFile);
         encFile.close();
-        remove((char *) &fileName[0]);
 
         std::cout << "Image Resolution: " << width << "x" << height << "\n";
         
         //  write pgm Image file
-        std::ofstream pgmFile("image.pgm");
+        std::ofstream pgmFile(std::string (encodedFileName.begin(),encodedFileName.end()-3) + "pgm");
         pgm::writePGM(pgmFile,"P5",pixels,width,height);
         pgmFile.flush();
         pgmFile.close();
+        // Delete compressed files
+        remove((char *) &treeFileName[0]);
+        remove((char *) &encodedFileName[0]);
         std::cout << "DONE!\n";
     }
 
@@ -82,7 +81,8 @@ int main(int argc, char** argv)
     else
     {
         int width, height, size;
-        std::ifstream pgmFile(argv[1]);
+        std::string fileName= argv[1];
+        std::ifstream pgmFile(fileName);
         if (!pgmFile)
         {
             std::cout << "PGM file doesn't exist\n";
@@ -103,13 +103,13 @@ int main(int argc, char** argv)
         huffTree.buildTree(frequencyTable);
 
         // Generate Frequency Table
-        std::ofstream frqfile("image.frq");
+        std::ofstream frqfile(fileName.replace(fileName.end()-3,fileName.end(),"frq"));
         frequencyTable.writeFreq(frqfile);
         frqfile.flush();
         frqfile.close();
 
         // Generate Encoded file
-        std::ofstream encFile("image.enc",std::ios::binary);
+        std::ofstream encFile(fileName.replace(fileName.end()-3,fileName.end(),"enc"),std::ios::binary);
         encFile.write((char *) &width, sizeof(width));
         encFile.write((char *) &height, sizeof(height));
         huffTree.encodeFile(encFile,pixels);

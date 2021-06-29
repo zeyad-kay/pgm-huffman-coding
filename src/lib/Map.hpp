@@ -62,7 +62,7 @@ private:
             {
                 find(node->right,key);
             }
-            else if (key < node->key)
+            else
             {
                 find(node->left,key);
             }
